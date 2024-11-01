@@ -1,283 +1,200 @@
 #include "GemStack.h"
 #include <tuple>
 
-GemStack::GemStack(color_t first_color, color_t middle_color, color_t last_color): current_orientation(UP)
+// special members
+GemStack::GemStack() : current_orientation(UP) {}
+GemStack::~GemStack(){}
+
+auto GemStack::get_first_x() -> x_t{return get_first_gem()->get_x();}
+auto GemStack::get_first_y() -> y_t{return get_first_gem()->get_y();}
+auto GemStack::get_middle_x() -> x_t{return get_middle_gem()->get_x();}
+auto GemStack::get_middle_y() -> y_t{return get_middle_gem()->get_y();}
+auto GemStack::get_last_x() -> x_t{return get_last_gem()->get_x();}
+auto GemStack::get_last_y() -> y_t{return get_last_gem()->get_y();}
+auto GemStack::get_first_xy() -> xy_t{return get_first_gem()->get_xy();}
+auto GemStack::get_middle_xy() -> xy_t{return get_middle_gem()->get_xy();}
+auto GemStack::get_last_xy() -> xy_t{return get_last_gem()->get_xy();}
+
+auto GemStack::gemstack_length() const -> int{return gems.size();}
+
+auto GemStack::get_current_orientation() const -> orientation_t{return current_orientation;}
+
+auto GemStack::get_first_gem() -> gem_raw_ptr{return first(gems).get();}
+auto GemStack::get_middle_gem() -> gem_raw_ptr{return middle(gems).get();}
+auto GemStack::get_last_gem() -> gem_raw_ptr{return last(gems).get();}
+
+// setters
+auto GemStack::set_first_xy(const x_t x, const y_t y) -> void{this->get_first_gem()->set_xy(x,y);}
+auto GemStack::set_middle_xy(const x_t x, const y_t y) -> void{this->get_middle_gem()->set_xy(x,y);}
+auto GemStack::set_last_xy(const x_t x, const y_t y) -> void{this->get_last_gem()->set_xy(x,y);}
+
+auto GemStack::get_gems() -> gemstack_elements_t*{return &gems;}
+
+auto GemStack::get_gem_colors() -> gemstack_colors_t
 {
-    first(gems) = std::make_unique<Gem>(first_color, settings::board_middle, settings::first_starting_y);
-    middle(gems) = std::make_unique<Gem>(middle_color, settings::board_middle, settings::middle_starting_y);
-    last(gems) = std::make_unique<Gem>(last_color, settings::board_middle, settings::last_starting_y);
+    return gemstack_colors_t{
+        get_first_gem()->get_color(),
+        get_middle_gem()->get_color(),
+        get_last_gem()->get_color() };
 }
 
-GemStack::~GemStack()
+auto GemStack::rotate_gemstack() -> void
 {
+    swap_colors( first(gems).get(), last(gems).get() );
+    swap_colors( last(gems).get(), middle(gems).get() );
 }
 
-int GemStack::gemstack_length()
+auto GemStack::toggle_orientation() -> void
 {
-    return std::tuple_size<decltype(this->gems)>::value;
-}
-
-gem_raw_ptr GemStack::get_first_gem()
-{
-    return first(gems).get();
-}
-
-gem_raw_ptr GemStack::get_middle_gem()
-{
-    return middle(gems).get();
-}
-
-gem_raw_ptr GemStack::get_last_gem()
-{
-    return last(gems).get();
-}
-/*
-void GemStack::rotate_gemstack()
-{
-    this->gems = std::make_tuple(this->get_middle_gem(), this->get_last_gem(), this->get_first_gem());
-}
-*/
-void GemStack::rotate_gemstack()
-{
-    std::rotate(gems.begin(), std::next(gems.begin()), gems.end());
-}
-
-orientation_t GemStack::get_current_orientation()
-{
-    return this->current_orientation;
-}
-
-void GemStack::toggle_orientation()
-{
-    switch (this->current_orientation)
+    switch ( current_orientation )
     {
         case UP:
-            this->current_orientation = RIGHT;
+            current_orientation = RIGHT;
             break;
         case RIGHT:
-            this->current_orientation = DOWN;
+            current_orientation = DOWN;
             break;
         case DOWN:
-            this->current_orientation = LEFT;
+            current_orientation = LEFT;
             break;
         case LEFT:
-            this->current_orientation = UP;
+            current_orientation = UP;
             break;
         default: break;
     }
 }
 
-xy_t GemStack::get_first_xy()
+auto GemStack::advance_gemstack() -> void
 {
-    return this->get_first_gem()->get_xy();
+   for (auto& gem: gems)
+        gem->inc_y();
 }
 
-xy_t GemStack::get_middle_xy()
+auto GemStack::shift_right() -> void
 {
-    return this->get_middle_gem()->get_xy();
+    // check not at the edge already
+    for (auto& gem: gems)
+        if ( gem->get_x() == settings::board_width )
+            return;
+
+    // move one space to the right
+    for (auto& gem: gems)
+        gem->set_x( gem->get_x() + 1 );
 }
 
-xy_t GemStack::get_last_xy()
+auto GemStack::shift_left() -> void
 {
-    return this->get_last_gem()->get_xy();
+    // check not already at the edge
+    for (auto& gem: gems)
+        if ( gem->get_x() == 0 )
+            return;
+
+    // move one space to the left
+    for (auto& gem: gems)
+        gem->set_x( gem->get_x() - 1 );
 }
 
-void GemStack::set_first_xy(int x, int y)
+auto GemStack::set_orientation(const orientation_t new_orientation) -> void
 {
-    this->get_first_gem()->set_xy(x,y);
-}
-
-void GemStack::set_middle_xy(int x, int y)
-{
-    this->get_middle_gem()->set_xy(x,y);
-}
-
-void GemStack::set_last_xy(int x, int y)
-{
-    this->get_last_gem()->set_xy(x,y);
-}
-
-int GemStack::get_first_x()
-{
-    return this->get_first_gem()->get_x();
-}
-
-int GemStack::get_first_y()
-{
-    return this->get_first_gem()->get_y();
-}
-
-int GemStack::get_middle_x()
-{
-    return this->get_middle_gem()->get_x();
-}
-
-int GemStack::get_middle_y()
-{
-    return this->get_middle_gem()->get_y();
-}
-
-int GemStack::get_last_x()
-{
-    return this->get_last_gem()->get_x();
-}
-
-int GemStack::get_last_y()
-{
-    return this->get_last_gem()->get_y();
-}
-
-void GemStack::advance_gemstack()
-{
-    switch (this->current_orientation)
-    {
-        case UP:
-            this->set_first_xy(this->get_first_x(), this->get_first_y()+1);
-            this->set_middle_xy(this->get_middle_x(), this->get_middle_y()+1);
-            this->set_last_xy(this->get_last_x(), this->get_last_y()+1);
-            break;
-        default: break;
-    }
-}
-
-void GemStack::shift_right()
-{
-    bool condition_1 = this->get_first_gem()->get_x() == settings::board_width;
-    bool condition_2 = this->get_middle_gem()->get_x() == settings::board_width;
-    bool condition_3 = this->get_last_gem()->get_x() == settings::board_width;
-
-    if (condition_1 || condition_2 || condition_3) return;
-
-    this->set_first_xy(this->get_first_x()+1, get_first_y());
-    this->set_middle_xy(this->get_middle_x()+1, get_middle_y());
-    this->set_last_xy(this->get_last_x()+1, this->get_last_y());
-}
-
-void GemStack::shift_left()
-{
-    bool condition_1 = this->get_first_gem()->get_x() == 0;
-    bool condition_2 = this->get_middle_gem()->get_x() == 0;
-    bool condition_3 = this->get_last_gem()->get_x() == 0;
-
-    if (condition_1 || condition_2 || condition_3) return;
-
-    this->set_first_xy(this->get_first_x()-1, get_first_y());
-    this->set_middle_xy(this->get_middle_x()-1, get_middle_y());
-    this->set_last_xy(this->get_last_x()-1, this->get_last_y());
-}
-
-void GemStack::set_orientation(const orientation_t new_orientation)
-{
-    if (new_orientation == this->current_orientation)
+    if ( new_orientation == current_orientation )
         return;
 
-    Gem *middle_gem = this->get_middle_gem();
+    const y_t m_y = get_middle_gem()->get_y();
+    const x_t m_x = get_middle_gem()->get_x();
 
-    bool current_orientation_is_up_or_down = (this->current_orientation == UP || this->current_orientation == DOWN);
-    bool new_orientation_is_left_or_right = (new_orientation == LEFT || new_orientation == RIGHT);
-    bool at_right_limit = this->get_first_gem()->get_x() == settings::board_width;
-    bool at_left_limit = this->get_first_gem()->get_x() == 0;
+    const bool current_orientation_is_up_or_down =
+        ( current_orientation == UP || current_orientation == DOWN );
+    const bool new_orientation_is_left_or_right =
+        ( new_orientation == LEFT || new_orientation == RIGHT );
 
-    if (current_orientation_is_up_or_down && new_orientation_is_left_or_right && at_right_limit)
-        switch (new_orientation) {
-            case RIGHT:
-                this->get_first_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y());
-                this->get_last_gem()->set_xy(middle_gem->get_x()-2, middle_gem->get_y());
-                this->get_middle_gem()->set_xy(middle_gem->get_x()-1, middle_gem->get_y());
-                break;
-            case LEFT:
-                this->get_last_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y());
-                this->get_first_gem()->set_xy(middle_gem->get_x()-2, middle_gem->get_y());
-                this->get_middle_gem()->set_xy(middle_gem->get_x()-1, middle_gem->get_y());
-                break;
-            default: break;
+    const bool at_right_limit =
+        LEFT == current_orientation ?
+            get_last_gem()->get_x() == settings::board_width
+            : get_first_gem()->get_x() == settings::board_width;
+    const bool at_left_limit =
+        RIGHT == current_orientation ?
+            get_last_gem()->get_x() == 0
+            : get_first_gem()->get_x() == 0;
+
+    if ( current_orientation_is_up_or_down
+         && new_orientation_is_left_or_right
+         && at_right_limit)
+        if ( RIGHT == new_orientation ) {
+                get_first_gem()->set_xy(m_x, m_y);
+                get_last_gem()->set_xy(m_x-2, m_y);
+                get_middle_gem()->set_xy(m_x-1, m_y);
+        } else {
+                get_last_gem()->set_xy(m_x, m_y);
+                get_first_gem()->set_xy(m_x-2, m_y);
+                get_middle_gem()->set_xy(m_x-1, m_y);
         }
-    else if (current_orientation_is_up_or_down && new_orientation_is_left_or_right && at_left_limit)
-        switch (new_orientation) {
-            case RIGHT:
-                this->get_last_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y());
-                this->get_first_gem()->set_xy(middle_gem->get_x()+2, middle_gem->get_y());
-                this->get_middle_gem()->set_xy(middle_gem->get_x()+1, middle_gem->get_y());
-                break;
-            case LEFT:
-                this->get_first_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y());
-                this->get_last_gem()->set_xy(middle_gem->get_x()+2, middle_gem->get_y());
-                this->get_middle_gem()->set_xy(middle_gem->get_x()+1, middle_gem->get_y());
-                break;
-            default: break;
+
+    else if (
+        current_orientation_is_up_or_down
+        && new_orientation_is_left_or_right
+        && at_left_limit )
+        if ( RIGHT == new_orientation ) {
+            get_last_gem()->set_xy(m_x, m_y);
+            get_first_gem()->set_xy(m_x+2, m_y);
+            get_middle_gem()->set_xy(m_x+1, m_y);
+        } else {
+            get_first_gem()->set_xy(m_x, m_y);
+            get_last_gem()->set_xy(m_x+2, m_y);
+            get_middle_gem()->set_xy(m_x+1, m_y);
         }
+
     else
         switch (new_orientation)
         {
             case UP:
-                this->get_first_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y()-1);
-                this->get_last_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y()+1);
+                get_first_gem()->set_xy(m_x, m_y-1);
+                get_last_gem()->set_xy(m_x, m_y+1);
                 break;
             case RIGHT:
-                this->get_first_gem()->set_xy(middle_gem->get_x()+1, middle_gem->get_y());
-                this->get_last_gem()->set_xy(middle_gem->get_x()-1, middle_gem->get_y());
+                get_first_gem()->set_xy(m_x+1, m_y);
+                get_last_gem()->set_xy(m_x-1, m_y);
                 break;
             case DOWN:
-                this->get_first_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y()+1);
-                this->get_last_gem()->set_xy(middle_gem->get_x(), middle_gem->get_y()-1);
+                get_first_gem()->set_xy(m_x, m_y+1);
+                get_last_gem()->set_xy(m_x, m_y-1);
                 break;
             case LEFT:
-                this->get_first_gem()->set_xy(middle_gem->get_x()-1, middle_gem->get_y());
-                this->get_last_gem()->set_xy(middle_gem->get_x()+1, middle_gem->get_y());
+                get_first_gem()->set_xy(m_x-1, m_y);
+                get_last_gem()->set_xy(m_x+1, m_y);
             default: break;
         }
-    this->current_orientation = new_orientation;
+
+    current_orientation = new_orientation;
 }
 
-void GemStack::sweep_right()
+auto GemStack::sweep_right(const span_t distance) -> void
 {
-    switch (this->current_orientation) {
-        case RIGHT:
-            this->get_first_gem()->set_x(settings::board_width);
-            this->get_middle_gem()->set_x(settings::board_width-1);
-            this->get_last_gem()->set_x(settings::board_width-2);
-            break;
-        case LEFT:
-            this->get_last_gem()->set_x(settings::board_width);
-            this->get_middle_gem()->set_x(settings::board_width-1);
-            this->get_first_gem()->set_x(settings::board_width-2);
-            break;
-        case UP:
-        case DOWN:
-            for (auto& gem: gems)
-                gem->set_x(settings::board_width);
-            break;
-        default: break;
-    }
+    for (gem_uptr& gem: gems)
+        gem->jump_x(distance);
 }
 
-void GemStack::sweep_left()
+auto GemStack::sweep_left(const span_t distance) -> void
 {
-    switch (current_orientation) {
-        case RIGHT:
-            this->get_last_gem()->set_x(0);
-            this->get_middle_gem()->set_x(1);
-            this->get_first_gem()->set_x(2);
-            break;
-        case LEFT:
-            this->get_first_gem()->set_x(0);
-            this->get_middle_gem()->set_x(1);
-            this->get_last_gem()->set_x(2);
-            break;
-        case DOWN:
-        case UP:
-            for (auto& gem: gems)
-                gem->set_x(0);
-            break;
-        default: break;
-    }
-
+    for (gem_uptr& gem: gems)
+        gem->jump_x(-distance);
 }
 
-gemstack_t GemStack::get_gem_colors()
+auto GemStack::populate_gemstack(gemstack_colors_t gem_colors) -> void
 {
-    color_t first_gem_color = this->get_first_gem()->get_color();
-    color_t middle_gem_color = this->get_first_gem()->get_color();
-    color_t last_gem_color = this->get_last_gem()->get_color();
-    return std::make_tuple(first_gem_color, middle_gem_color, last_gem_color);
+    first(gems) = std::make_unique<Gem>(
+        first(gem_colors),
+        settings::board_middle,
+        settings::first_starting_y);
+    middle(gems) = std::make_unique<Gem>(
+        middle(gem_colors),
+        settings::board_middle,
+        settings::middle_starting_y);
+    last(gems) = std::make_unique<Gem>(
+        last(gem_colors),
+        settings::board_middle,
+        settings::last_starting_y);
 }
+
+
+
+
