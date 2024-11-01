@@ -1,35 +1,112 @@
 #include "Blob.h"
 
-Blob::Blob()
+// special members
+Blob::Blob(){std::fill(floor.begin(), floor.end(), settings::board_height);}
+Blob::~Blob(){}
+
+// getters
+auto Blob::get_blob() -> blob_t*{return &blob;}
+auto Blob::get_floor() const ->floor_t{return floor;}
+
+// stats
+auto Blob::count_connectors() const -> count_t {return blob.size();}
+
+auto Blob::count_gems_in_blob() const -> count_t
 {
-    std::fill(begin(floor), end(floor), settings::board_height);
+    return std::transform_reduce(begin(blob), end(blob), 0, std::plus{},
+        [](const connector_t& connector){
+            return connector.size();
+    });
 }
 
-Blob::~Blob()
+auto Blob::measure_blob_height() const -> span_t
 {
-
+    return *std::max_element(floor.cbegin(), floor.cend());
 }
 
-floor_t Blob::get_floor()
+auto Blob::count_gems_to_destroy() const -> count_t
 {
-    return this->floor;
+    return std::transform_reduce(cbegin(blob), cend(blob), 0, std::plus{},
+        [](const connector_t& connector){
+            return connector.size() >= settings::gems_to_connect
+                                        ? connector.size() : 0;
+    });
 }
 
-void Blob::calculate_floor()
+auto Blob::measure_longest_connector() const -> span_t
 {
-    for (int i = 0; i < this->floor.size(); i++)
-        this->floor[i] = *(this->board[i].begin());
+    return std::max_element(blob.cbegin(), blob.cend(),
+        [](const connector_t& lhs, const connector_t& rhs){
+            return lhs.size() < rhs.size();
+    })->size();
 }
 
-/*
-int Blob::get_top_of_column(column_t column)
+auto Blob::count_gems_of_color(color_t color) const -> count_t
 {
-    for (auto y: column)
-        if (y != 0)
+    return std::transform_reduce(blob.cbegin(), blob.cbegin(), 0, std::plus{},
+        [c=color](const connector_t& connector){
+            return c == connector.front()->get_color() ? connector.size() : 0;
+    });
 }
-*/
 
-void Blob::add_gem_to_blob(gem_uptr gem)
+auto Blob::count_connectors_to_destroy() const -> count_t
+{
+    return std::count_if(blob.cbegin(), blob.cend(), [](const connector_t& connector){
+        return connector.size() >= settings::gems_to_connect;
+    });
+}
+
+auto
+Blob::count_gems_to_destroy_of_color(const color_t color) const -> count_t
+{
+    return std::transform_reduce(cbegin(blob), cend(blob), 0, std::plus{},
+        [color=color](const connector_t& connector){
+            const bool condition = connector.front()->get_color() ==
+                                        color && connector.size() >=
+                                        settings::gems_to_connect;
+            return condition ? connector.size() : 0;
+    });
+}
+
+// checkers
+auto
+Blob::gems_are_connected(gem_raw_ptr first, gem_raw_ptr second) const -> bool
+{
+    bool gems_are_x_neighbors =
+        abs( first->get_x() - second->get_x() ) == 1 && first->get_y() == second->get_y();
+    bool gems_are_y_neighbors =
+        abs( first->get_y() - second->get_y() ) == 1 && first->get_x() == second->get_x();
+
+    return gems_are_x_neighbors || gems_are_y_neighbors;
+}
+
+// actions
+auto Blob::clear_blob() -> void{blob.clear();}
+
+auto Blob::update_floor() -> void
+{
+    std::fill(floor.begin(), floor.end(), settings::board_height);
+    for ( const gem_uptr& gem: blob | std::views::join )
+        floor[ gem->get_x() ] = std::min( floor [ gem-> get_x() ], gem->get_y() - 1 );
+}
+
+auto Blob::destroy_connectors() -> blob_t
+{
+    blob_t destroyed_connectors;
+
+    auto connectors_to_destroy = std::partition(blob.begin(), blob.end(),
+        [](const connector_t& connector){
+            return connector.size() < settings::gems_to_connect;
+    });
+
+    std::move(connectors_to_destroy, end(blob), std::back_inserter(destroyed_connectors));
+
+    blob.erase(connectors_to_destroy, end(blob));
+
+    return destroyed_connectors;
+}
+
+auto Blob::add_gem_to_blob(gem_uptr gem) -> void
 {
     // indexes of connectors the gem is adjacent to
     std::vector<int> matched_connectors;
@@ -37,7 +114,7 @@ void Blob::add_gem_to_blob(gem_uptr gem)
     // the index of connectors in the blob
     int index = 0;
 
-    for (auto& connector : blob){
+    for (connector_t& connector : blob){
 
         bool colors_match = connector.front()->get_color() == gem->get_color();
 
@@ -57,7 +134,7 @@ void Blob::add_gem_to_blob(gem_uptr gem)
         int destination_connector_index = matched_connectors.front();
 
         // add gem to connector
-        blob [ destination_connector_index ].push_back(std::move(gem));
+        blob [ destination_connector_index ].push_back( std::move( gem ) );
 
         // merge connected connectors
         std::for_each(std::next(matched_connectors.begin()), matched_connectors.end(),
@@ -68,6 +145,7 @@ void Blob::add_gem_to_blob(gem_uptr gem)
                 blob[ connector_to_splice],
                 blob[ connector_to_splice].begin(),
                 blob[ connector_to_splice].end());
+                blob.erase( blob.begin() + connector_to_splice );
         });
 
     } else { // no matching connector, make a new one
@@ -76,158 +154,8 @@ void Blob::add_gem_to_blob(gem_uptr gem)
         blob.push_back( std::move(temp) );
     }
 }
-/*
 
-        blob.push_back( std::vector<Gem>{gem} );
 
-        // merge connectors
-        for (; i < matched_connectors.size(); i++) {
-
-            // index of connector to merge
-            source_connector_index = matched_connectors[i];
-
-            // insert contents of connector into destination connector
-            blob[ destination_connector_index ].insert(
-                blob[ destination_connector_index ].begin(),
-                blob[ destination_connector_index ].end(),
-                blob[ source_connector_index ].begin()
-            );
-
-            // delete merged connector
-            blob.erase( blob.begin() + matched_connectors[i] - 1 );
-        }
-    } else // if a matching connector wasn't found, make a new one
-        blob.push_back( std::vector<Gem>{gem} );
-}
-
-auto Blob::destroy_connectors(void) -> connector_t
-{
-    std::vector<Gem> deleted_gems;
-
-    int i = 0;
-    for (; i < blob.size(); i++)
-    {
-        int connector_index = i;
-        int connector_size = blob[connector_index].size();
-
-        if ( connector_size > 3 )
-        {
-            deleted_gems = std::move( blob[ connector_index ] );
-            blob.erase( blob.begin() + connector_index );
-            i = 0;
-        }
-    }
-    return deleted_gems;
-}
-*/
-auto Blob::destroy_connectors(void) -> blob_t
-{
-    blob_t destroyed_connectors;
-
-    auto connectors_to_destroy = std::remove_if(begin(blob), end(blob),
-        [](const connector_t& connector){
-            return connector.size() > 3;
-    });
-
-    std::move(connectors_to_destroy, end(blob), std::back_inserter(destroyed_connectors));
-
-    blob.erase(connectors_to_destroy, end(blob));
-
-    return destroyed_connectors;
-}
-
-auto Blob::total_connectors_to_destroy() -> count_t
-{
-    return std::count_if(cbegin(blob), cend(blob), [](const connector_t& connector){
-        return connector.size() > 3;
-    });
-}
-
-auto Blob::total_gems_to_destroy() -> count_t
-{
-    return std::transform_reduce(begin(blob), end(blob), 0, std::plus{},
-        [](const connector_t& connector){
-            return connector.size() > 3 ? connector.size() : 0;
-    });
-}
-
-auto Blob::total_gems_to_destroy_of_color(const color_t color) -> count_t
-{
-    return std::transform_reduce(begin(blob), end(blob), 0, std::plus{},
-        [color=color](const connector_t& connector){
-            bool condition = connector.front()->get_color() == color && connector.size() > 3;
-            return condition ? connector.size() : 0;
-    });
-}
-
-auto Blob::get_blob_height() -> span_t
-{
-    return *std::max_element(begin(floor), end(floor));
-}
-
-auto Blob::update_floor() -> void
-{
-    for (const connector_t& connector: blob)
-        for (auto it = connector.begin(); it != connector.end(); ++it)
-            if (it->get()->get_y() < floor[it->get()->get_x()])
-                floor[it->get()->get_x()] = it->get()->get_y();
-}
-
-/*
-    int i = 0;
-    std::for_each(begin(blob), end(blob), [](connector_t connector){
-        if (connector.size() > 3)
-            deleted_gems = std::move(connector);
-            blob.erase()
-    });
-    {
-        int connector_index = i;
-        int connector_size = blob[connector_index].size();
-
-        if ( connector_size > 3 )
-        {
-            deleted_gems = std::move( blob[ connector_index ] );
-            blob.erase( blob.begin() + connector_index );
-            i = 0;
-        }
-    }
-    return deleted_gems;
-}
-*/
-
-int Blob::get_red_gem_count()
-{
-    return 3;
-}
-
-int Blob::get_connector_count()
-{
-    return this->blob.size();
-}
-
-blob_t* Blob::get_blob()
-{
-    return &(this->blob);
-}
-
-bool Blob::gems_are_connected(gem_raw_ptr first, gem_raw_ptr second)
-{
-
-    bool gems_are_x_neighbors =
-        abs( first->get_x() - second->get_x() ) == 1 && first->get_y() == second->get_y();
-    bool gems_are_y_neighbors =
-        abs( first->get_y() - second->get_y() ) == 1 && first->get_x() == second->get_x();
-
-    return gems_are_x_neighbors || gems_are_y_neighbors;
-}
-
-count_t Blob::get_blob_size()
-{
-    return std::transform_reduce(begin(blob), end(blob), 0, std::plus{},
-        [](const connector_t& connector){
-            return connector.size();
-    });
-}
 
 
 
