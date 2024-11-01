@@ -76,10 +76,6 @@ auto Game::__current_gemstack_is_rotation_blocked() -> bool
         return true;
 }
 
-
-
-
-
 auto Game::__current_gemstack_is_shift_left_blocked() -> bool
 {
     if ( LEFT == current_gemstack.get_current_orientation()
@@ -113,25 +109,33 @@ auto Game::__current_gemstack_is_shift_right_blocked() -> bool
 auto Game::__measure_distance_to_right_blocking_gem_from(const x_t x_, const y_t y_ ) const -> span_t
 {
     const floor_t floor = get_floor();
+    
     auto x = floor.cbegin();
+    
     std::advance( x, x_ );
+    
     auto it = std::find_if( std::next( x ), floor.cend(),
         [&](const int& y){
             return y < y_;
     });
+    
     return std::distance( x, it ) - 1;
 }
 
 auto Game::__measure_distance_to_left_blocking_gem_from(const x_t x_, const y_t y_) const -> span_t
 {
     const floor_t floor = get_floor();
+    
     auto x = floor.crbegin();
+    
     std::advance( x, floor.size() - x_ );
+    
     auto it = std::find_if( x, floor.crend(),
         [&](const int& y){
             return y < y_;
     });
-    return std::distance( std::prev(x), it) - 1;
+    
+    return std::distance( std::prev(x), it ) - 1;
 }
 
 auto Game::__measure_distance_to_right_blocking_gem() -> span_t
@@ -211,7 +215,7 @@ auto Game::update_gemstack() -> void
 
 auto Game::count_columns_in_grid() const -> count_t
 {
-    return std::count_if( grid.begin(), grid.end(),
+    return std::count_if(grid.begin(), grid.end(),
         []( auto& column ){
         return !column.empty();
     });
@@ -220,15 +224,17 @@ auto Game::count_columns_in_grid() const -> count_t
 auto Game::convert_blob_to_grid() -> void
 {
     std::for_each(grid.begin(), grid.end(),
-        [](column_t& column){
+        []( column_t& column ){
             column.clear();
     });
-    for ( auto& connector: *blob.get_blob() )
-        for ( auto& gem: connector )
+    
+    for ( connector_t& connector: *blob.get_blob() )
+        for ( gem_uptr& gem: connector )
             grid[ gem->get_x() ].push_back( gem.get() );
+            
     for ( column_t& column: grid )
         std::sort(column.begin(), column.end(),
-            [](const gem_raw_ptr lhs, const gem_raw_ptr rhs){
+            []( const gem_raw_ptr lhs, const gem_raw_ptr rhs ){
                 return lhs->get_y() > rhs->get_y();
         });
 }
@@ -236,12 +242,12 @@ auto Game::convert_blob_to_grid() -> void
 auto Game::cascade_grid() -> bool
 {
     bool cascaded = false;
-    for ( auto& column: grid )
-        for (int i = settings::board_height; i >= 0; --i) {
+    for ( column_t& column: grid )
+        for ( int i = settings::board_height; i >= 0; --i ){
             if ( ( settings::board_height + 1 ) - i > column.size() ){
                 break;
             }
-            if (column[ settings::board_height - i ]->get_y() < i){
+            if ( column[ settings::board_height - i ]->get_y() < i ){
                 column[ settings::board_height - i ]->inc_y();
                 cascaded = true;
             }
@@ -249,14 +255,10 @@ auto Game::cascade_grid() -> bool
     return cascaded;
 }
 
-
-
-
-
 // stats
 auto Game::count_connectors_to_destroy() const -> count_t{return blob.count_connectors_to_destroy();}
 auto Game::count_gems_to_destroy() const -> count_t{return blob.count_gems_to_destroy();}
-auto Game::count_gems_of_color(color_t color) const -> count_t{return blob.count_gems_of_color(color);}
+auto Game::count_gems_of_color(const color_t color) const -> count_t{return blob.count_gems_of_color(color);}
 auto Game::measure_longest_connector() const -> span_t{return blob.measure_longest_connector();}
 
 auto Game::count_gems_in_grid() const -> count_t
@@ -267,12 +269,7 @@ auto Game::count_gems_in_grid() const -> count_t
     });
 }
 
-
-
-
-
-
-
+// checkers
 auto Game::game_is_over() const -> bool
 {
     const floor_t floor = get_floor();
@@ -285,9 +282,9 @@ auto Game::game_is_over() const -> bool
 
 auto Game::grid_is_cascading() const -> bool
 {
-    for (const column_t& column: grid)
-        for (int i = 0; i < column.size(); i++)
-            if ( column[i]->get_y() < settings::board_height - i)
+    for ( const column_t& column: grid )
+        for ( int i = 0; i < column.size(); i++ )
+            if ( column[ i ]->get_y() < settings::board_height - i )
                 return true;
     return false;
 }
@@ -301,7 +298,7 @@ auto Game::gemstack_is_at_floor() -> bool
         ( *gemstack_gems ).cbegin(),
         ( *gemstack_gems ).cend(),
         [&]( const gem_uptr& gem ){
-            return gem->get_y() == blob.get_floor()[gem->get_x()];
+            return gem->get_y() == blob.get_floor()[ gem->get_x() ];
     });
 }
 
@@ -370,6 +367,7 @@ auto Game::update_floor() -> void{blob.update_floor();}
 auto Game::reset_blob() -> void
 {
     std::vector<gem_uptr> temp;
+    
     temp.reserve( blob.count_gems_in_blob() );
 
     for ( connector_t& connector: *get_blob() )
@@ -378,7 +376,7 @@ auto Game::reset_blob() -> void
 
     blob.clear_blob();
 
-    for ( auto& gem: temp )
+    for ( gem_uptr& gem: temp )
         blob.add_gem_to_blob( std::move( gem ) );
 }
 
