@@ -1,52 +1,31 @@
 #include "Gem.h"
 
-Gem::Gem()
+// special members
+Gem::Gem(){}
+Gem::Gem(color_t color, int x, int y) :
+    gem_color(color),
+    position(std::make_pair(x,y)){}
+Gem::~Gem(){}
+
+// getters
+auto Gem::get_x() const -> x_t{return left(position);}
+auto Gem::get_y() const -> y_t{return right(position);}
+auto Gem::get_xy() const -> xy_t{return position;}
+auto Gem::get_color() const -> color_t{return gem_color;}
+
+// setters
+auto Gem::set_x(x_t x) -> void{left(position) = x;}
+auto Gem::set_y(y_t y) -> void{right(position) = y;}
+auto Gem::set_xy(x_t x, y_t y) -> void{position = std::make_pair(x, y);}
+
+// actions
+auto Gem::inc_y() -> void{++right(position);}
+auto Gem::jump_x(span_t distance) -> void{left(position) += distance;}
+
+// friend
+auto swap_colors(gem_raw_ptr lhs, gem_raw_ptr rhs) -> void
 {
+    color_t temp = lhs->gem_color;
+    lhs->gem_color = rhs->gem_color;
+    rhs->gem_color = temp;
 }
-
-Gem::Gem(color_t color, int x, int y) : gem_color(color), position(std::make_pair(x,y))
-{
-}
-
-Gem::~Gem()
-{
-    //dtor
-}
-
-color_t Gem::get_color() const
-{
-    return this->gem_color;
-}
-
-xy_t Gem::get_xy() const
-{
-    return this->position;
-}
-
-int Gem::get_x() const
-{
-    return left(this->position);
-}
-
-int Gem::get_y() const
-{
-    return right(this->position);
-}
-
-void Gem::set_xy(int x, int y)
-{
-    this->position = std::make_pair(x, y);
-}
-
-void Gem::set_x(int x)
-{
-    left(this->position) = x;
-}
-
-void Gem::set_y(int y)
-{
-    right(this->position) = y;
-}
-
-
-
