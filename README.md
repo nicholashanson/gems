@@ -2,6 +2,5 @@
 
 A tile-matching puzzle game based on "Columns".
 
-Gems are represented by the Gem class. Unique pointers are used as handles to transfer 
-the gems form construction in the GemStack to storage in the Blob
-and finally destruction.
+![gems](https://github.com/user-attachments/assets/d03873bd-f65f-473a-bafd-6b531d23147c)
+
