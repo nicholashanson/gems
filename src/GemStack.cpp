@@ -1,5 +1,4 @@
 #include "GemStack.h"
-#include <tuple>
 
 // special members
 GemStack::GemStack() : current_orientation(UP) {}
