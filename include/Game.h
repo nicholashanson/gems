@@ -70,7 +70,10 @@ class Game
         auto add_gemstack_to_blob(gemstack_elements_t) -> void;
         auto destroy_blob_connectors() -> blob_t;
         auto update_floor() -> void;
+    #ifndef TEST
     private:
+    #endif
+
         // checkers
         auto __current_gemstack_is_shift_left_blocked() -> bool;
         auto __current_gemstack_is_shift_right_blocked() -> bool;
