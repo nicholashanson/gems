@@ -80,7 +80,7 @@ void draw_blob(const blob_t* blob)
                 draw_gem(gem.get());
 }
 
-auto draw_points_count(score_t current_score) -> void
+auto draw_points_count(const score_t current_score) -> void
 {
    DrawRectangle( settings::points_count_x_offset,
                   settings::points_count_y_offset,
@@ -95,19 +95,19 @@ auto draw_points_count(score_t current_score) -> void
                         WHITE );
 }
 
-auto get_gem_x_coord(int i) -> int
+auto get_gem_x_coord(const int i) -> int
 {
     return i*settings::square_size + settings::board_x_offset;
 }
 
-auto get_gem_y_coord(int j) -> int
+auto get_gem_y_coord(const int j) -> int
 {
     return j*settings::square_size + settings::board_y_offset;
 }
 
 auto draw_gemstack(GemStack* gemstack)
 {
-    for ( const auto& gem: *( gemstack->get_gems() ) )
+    for ( const gem_uptr& gem: *( gemstack->get_gems() ) )
         draw_gem( gem.get() );
 }
 
@@ -124,8 +124,8 @@ auto draw_board() -> void
 auto flash_gems() -> void
 {
     if (flash_gems_count % 2 == 0)
-        for (auto& connector: destroyed_gems)
-            for (auto& gem: connector)
+        for ( const connector_t& connector: destroyed_gems )
+            for ( const gem_uptr& gem: connector)
                 DrawRectangle(
                                get_gem_x_coord(gem->get_x()),
                                get_gem_y_coord(gem->get_y()),
