@@ -22,7 +22,7 @@ class Blob
         auto measure_longest_connector() const -> span_t;
         auto count_gems_of_color(color_t) const -> count_t;
         auto count_connectors_to_destroy() const -> count_t;
-        auto count_gems_to_destroy_of_color(color_t) const -> count_t;
+        auto count_gems_to_destroy_of_color(const color_t) const -> count_t;
 
         // checkers
         auto gems_are_adjacent(const gem_raw_ptr const, const gem_raw_ptr const) const -> bool;
