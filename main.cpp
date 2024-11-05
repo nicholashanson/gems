@@ -9,21 +9,28 @@ blob_t destroyed_gems;
 
 void draw_gem(const gem_raw_ptr gem)
 {
+    Rectangle rec = {
+                get_gem_x_coord(gem->get_x()),
+                get_gem_y_coord(gem->get_y()),
+                settings::square_size,
+                settings::square_size
+            };
     switch (gem->get_color()){
         case YELLOW_C:
-            DrawRectangle(
-                      get_gem_x_coord(gem->get_x()),
-                      get_gem_y_coord(gem->get_y()),
-                      settings::square_size,
-                      settings::square_size,
-                      YELLOW );
+            DrawPoly(
+                      Vector2{
+                          get_gem_x_coord(gem->get_x()) + settings::square_size / 2,
+                          get_gem_y_coord(gem->get_y()) + settings::square_size / 2},
+                      6,
+                      settings::square_size / 2,
+                      90,
+                      YELLOW);
             break;
         case BLUE_C:
-            DrawRectangle(
-                      get_gem_x_coord(gem->get_x()),
-                      get_gem_y_coord(gem->get_y()),
-                      settings::square_size,
-                      settings::square_size,
+            DrawRectangleRounded(
+                      rec,
+                      0.2f,
+                      0,
                       BLUE);
             break;
         case GREEN_C:
@@ -128,7 +135,6 @@ auto flash_gems() -> void
     else
         draw_blob(&destroyed_gems);
     flash_gems_count--;
-    std::cout << "flashing gem" << std::endl;
     _sleep(100);
     if (flash_gems_count == 0) destroyed_gems.clear();
 }
@@ -146,10 +152,10 @@ auto pause() -> void
 
 std::map<int, std::function<void()>> controls
 {
-    { KEY_A, [](){ game.set_gemstack_orientation(LEFT); } },
-    { KEY_S, [](){ game.set_gemstack_orientation(RIGHT); } },
+    { KEY_A, [](){ game.set_gemstack_orientation( LEFT ); } },
+    { KEY_S, [](){ game.set_gemstack_orientation( RIGHT ); } },
     { KEY_SPACE, pause },
-    { KEY_Z, [](){ game.set_gemstack_orientation(DOWN); } },
+    { KEY_Z, [](){ game.set_gemstack_orientation( DOWN ); } },
     { KEY_R, [](){ game.rotate_gemstack(); } },
     { KEY_LEFT, [](){ game.shift_gemstack_left(); } },
     { KEY_RIGHT, [](){ game.shift_gemstack_right(); } }
@@ -162,14 +168,14 @@ int main()
                "Gems");
     SetTargetFPS(4);
 
-    while (!WindowShouldClose())
+    while ( !WindowShouldClose() )
     {
         game.advance_game();
 
         BeginDrawing();
         ClearBackground(GRAY);
-        draw_board();
 
+        draw_board();
         draw_points_count(game.get_current_score());
         draw_blob(game.get_blob());
         draw_gemstack(game.get_current_gemstack());

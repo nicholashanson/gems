@@ -25,7 +25,7 @@ class Blob
         auto count_gems_to_destroy_of_color(const color_t) const -> count_t;
 
         // checkers
-        auto gems_are_adjacent(const gem_raw_ptr const, const gem_raw_ptr const) const -> bool;
+        auto gems_are_adjacent(const gem_raw_ptr,const gem_raw_ptr) const -> bool;
 
         // actions
         auto clear_blob() -> void;
