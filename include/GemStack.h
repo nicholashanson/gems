@@ -1,6 +1,7 @@
 #ifndef GEMSTACK_H
 #define GEMSTACK_H
 #include "definitions.h"
+#include "Gem.h"
 #include "macros.h"
 
 class GemStack
