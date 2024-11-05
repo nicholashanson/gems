@@ -14,26 +14,51 @@ Game::Game():
 Game::~Game(){}
 
 // getters
-auto Game::get_current_score() const -> score_t{return current_score;}
+auto Game::get_current_score() const -> score_t
+{return current_score;}
 
-auto Game::get_first_x() -> x_t{return current_gemstack.get_first_x();}
-auto Game::get_first_y() -> y_t{return current_gemstack.get_first_y();}
-auto Game::get_first_xy() -> xy_t{return current_gemstack.get_first_xy();}
-auto Game::get_middle_x() -> x_t{return current_gemstack.get_middle_x();}
-auto Game::get_middle_y() -> y_t{return current_gemstack.get_middle_y();}
-auto Game::get_last_x() -> x_t{return current_gemstack.get_last_x();}
-auto Game::get_last_y() -> y_t{return current_gemstack.get_last_y();}
-auto Game::get_current_gemstack() -> GemStack* {return &current_gemstack;}
-auto Game::get_gemstack_orientation() const -> orientation_t{return current_gemstack.get_current_orientation();}
-auto Game::get_current_gemstack_colors() -> gemstack_colors_t{return current_gemstack.get_gem_colors();}
-auto Game::get_next_gemstack_colors() const -> gemstack_colors_t{return next_gemstack_colors;}
+auto Game::get_first_x() -> x_t
+{return current_gemstack.get_first_x();}
 
-auto Game::get_floor() const -> floor_t{return blob.get_floor();}
+auto Game::get_first_y() -> y_t
+{return current_gemstack.get_first_y();}
 
-auto Game::get_grid() -> grid_t*{return &grid;}
+auto Game::get_first_xy() -> xy_t
+{return current_gemstack.get_first_xy();}
+
+auto Game::get_middle_x() -> x_t
+{return current_gemstack.get_middle_x();}
+
+auto Game::get_middle_y() -> y_t
+{return current_gemstack.get_middle_y();}
+
+auto Game::get_last_x() -> x_t
+{return current_gemstack.get_last_x();}
+
+auto Game::get_last_y() -> y_t
+{return current_gemstack.get_last_y();}
+
+auto Game::get_current_gemstack() -> GemStack*
+{return &current_gemstack;}
+
+auto Game::get_gemstack_orientation() const -> orientation_t
+{return current_gemstack.get_current_orientation();}
+
+auto Game::get_current_gemstack_colors() -> gemstack_colors_t
+{return current_gemstack.get_gem_colors();}
+
+auto Game::get_next_gemstack_colors() const -> gemstack_colors_t
+{return next_gemstack_colors;}
+
+auto Game::get_floor() const -> floor_t
+{return blob.get_floor();}
+
+auto Game::get_grid() -> grid_t*
+{return &grid;}
 
 // setters
-auto Game::set_gemstack_orientation(const orientation_t ori) -> void {current_gemstack.set_orientation(ori);}
+auto Game::set_gemstack_orientation(const orientation_t ori) -> void
+{current_gemstack.set_orientation(ori);}
 
 // checkers
 auto Game::__current_gemstack_is_rotation_blocked() -> bool
@@ -109,32 +134,32 @@ auto Game::__current_gemstack_is_shift_right_blocked() -> bool
 auto Game::__measure_distance_to_right_blocking_gem_from(const x_t x_, const y_t y_ ) const -> span_t
 {
     const floor_t floor = get_floor();
-    
+
     auto x = floor.cbegin();
-    
+
     std::advance( x, x_ );
-    
+
     auto it = std::find_if( std::next( x ), floor.cend(),
         [&](const int& y){
             return y < y_;
     });
-    
+
     return std::distance( x, it ) - 1;
 }
 
 auto Game::__measure_distance_to_left_blocking_gem_from(const x_t x_, const y_t y_) const -> span_t
 {
     const floor_t floor = get_floor();
-    
+
     auto x = floor.crbegin();
-    
+
     std::advance( x, floor.size() - x_ );
-    
+
     auto it = std::find_if( x, floor.crend(),
         [&](const int& y){
             return y < y_;
     });
-    
+
     return std::distance( std::prev(x), it ) - 1;
 }
 
@@ -177,15 +202,20 @@ auto Game::add_gem_layer() -> void
                          i, get_floor()[i]) );
 }
 
-auto Game::count_connectors_in_blob() const -> count_t{return blob.count_connectors();}
+auto Game::count_connectors_in_blob() const -> count_t
+{return blob.count_connectors();}
 
-auto Game::get_blob() -> blob_t*{return blob.get_blob();}
+auto Game::get_blob() -> blob_t*
+{return blob.get_blob();}
 
-auto Game::add_gem_to_blob(gem_uptr gem) -> void{return blob.add_gem_to_blob( std::move(gem) );}
+auto Game::add_gem_to_blob(gem_uptr gem) -> void
+{return blob.add_gem_to_blob( std::move(gem) );}
 
-auto Game::destroy_blob_connectors() -> blob_t{return blob.destroy_connectors();}
+auto Game::destroy_blob_connectors() -> blob_t
+{return blob.destroy_connectors();}
 
-auto Game::count_gems_in_blob() const -> count_t{return blob.count_gems_in_blob();}
+auto Game::count_gems_in_blob() const -> count_t
+{return blob.count_gems_in_blob();}
 
 auto Game::add_current_gemstack_to_blob() -> void
 {
@@ -199,7 +229,8 @@ auto Game::add_current_gemstack_to_blob() -> void
              blob.add_gem_to_blob( std::move( gem ) );
 }
 
-auto Game::get_random_gem_color() -> color_t{return static_cast<color_t>( distribution ( generator ) );}
+auto Game::get_random_gem_color() -> color_t
+{return static_cast<color_t>( distribution ( generator ) );}
 
 auto Game::__generate_next_gemstack_colors() -> void
 {
@@ -227,11 +258,11 @@ auto Game::convert_blob_to_grid() -> void
         []( column_t& column ){
             column.clear();
     });
-    
+
     for ( connector_t& connector: *blob.get_blob() )
         for ( gem_uptr& gem: connector )
             grid[ gem->get_x() ].push_back( gem.get() );
-            
+
     for ( column_t& column: grid )
         std::sort(column.begin(), column.end(),
             []( const gem_raw_ptr lhs, const gem_raw_ptr rhs ){
@@ -256,10 +287,17 @@ auto Game::cascade_grid() -> bool
 }
 
 // stats
-auto Game::count_connectors_to_destroy() const -> count_t{return blob.count_connectors_to_destroy();}
-auto Game::count_gems_to_destroy() const -> count_t{return blob.count_gems_to_destroy();}
-auto Game::count_gems_of_color(const color_t color) const -> count_t{return blob.count_gems_of_color(color);}
-auto Game::measure_longest_connector() const -> span_t{return blob.measure_longest_connector();}
+auto Game::count_connectors_to_destroy() const -> count_t
+{return blob.count_connectors_to_destroy();}
+
+auto Game::count_gems_to_destroy() const -> count_t
+{return blob.count_gems_to_destroy();}
+
+auto Game::count_gems_of_color(const color_t color) const -> count_t
+{return blob.count_gems_of_color(color);}
+
+auto Game::measure_longest_connector() const -> span_t
+{return blob.measure_longest_connector();}
 
 auto Game::count_gems_in_grid() const -> count_t
 {
@@ -289,7 +327,8 @@ auto Game::grid_is_cascading() const -> bool
     return false;
 }
 
-auto Game::game_is_paused() const -> bool{return PAUSED == current_status;}
+auto Game::game_is_paused() const -> bool
+{return PAUSED == current_status;}
 
 auto Game::gemstack_is_at_floor() -> bool
 {
@@ -303,11 +342,15 @@ auto Game::gemstack_is_at_floor() -> bool
 }
 
 // setters
-auto Game::set_status(status_t new_status) -> void{current_status = new_status;}
+auto Game::set_status(status_t new_status) -> void
+{current_status = new_status;}
 
 // actions
-auto Game::advance_gemstack() -> void{current_gemstack.advance_gemstack();}
-auto Game::rotate_gemstack() -> void{current_gemstack.rotate_gemstack();}
+auto Game::advance_gemstack() -> void
+{current_gemstack.advance_gemstack();}
+
+auto Game::rotate_gemstack() -> void
+{current_gemstack.rotate_gemstack();}
 
 auto Game::shift_gemstack_left() -> void
 {
@@ -367,7 +410,7 @@ auto Game::update_floor() -> void{blob.update_floor();}
 auto Game::reset_blob() -> void
 {
     std::vector<gem_uptr> temp;
-    
+
     temp.reserve( blob.count_gems_in_blob() );
 
     for ( connector_t& connector: *get_blob() )
@@ -410,11 +453,3 @@ auto Game::advance_game() -> void
     add_points( destroy_blob_connectors() );
     advance_gemstack();
 }
-
-
-
-
-
-
-
-
