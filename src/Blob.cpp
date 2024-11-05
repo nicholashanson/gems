@@ -41,9 +41,9 @@ auto Blob::measure_longest_connector() const -> span_t
     })->size();
 }
 
-auto Blob::count_gems_of_color(color_t color) const -> count_t
+auto Blob::count_gems_of_color(const color_t color) const -> count_t
 {
-    return std::transform_reduce(blob.cbegin(), blob.cbegin(), 0, std::plus{},
+    return std::transform_reduce(blob.cbegin(), blob.end(), 0, std::plus{},
         [c=color](const connector_t& connector){
             return c == connector.front()->get_color() ? connector.size() : 0;
     });
@@ -70,14 +70,14 @@ Blob::count_gems_to_destroy_of_color(const color_t color) const -> count_t
 
 // checkers
 auto
-Blob::gems_are_adjacent(gem_raw_ptr first, gem_raw_ptr second) const -> bool
+Blob::gems_are_adjacent(const gem_raw_ptr first, const gem_raw_ptr second) const -> bool
 {
-    bool gems_are_x_neighbors =
+    const bool gems_are_x_adjacent =
         abs( first->get_x() - second->get_x() ) == 1 && first->get_y() == second->get_y();
-    bool gems_are_y_neighbors =
+    const bool gems_are_y_adjacent =
         abs( first->get_y() - second->get_y() ) == 1 && first->get_x() == second->get_x();
 
-    return gems_are_x_neighbors || gems_are_y_neighbors;
+    return gems_are_x_adjacent || gems_are_y_adjacent;
 }
 
 // actions
@@ -115,7 +115,7 @@ auto Blob::add_gem_to_blob(gem_uptr gem) -> void
     int index = 0;
 
     for ( connector_t& connector : blob ){
-        
+
         // the color of the gem to add is the same as the color of the gems
         // in this connector
         bool colors_match = connector.front()->get_color() == gem->get_color();
@@ -125,10 +125,10 @@ auto Blob::add_gem_to_blob(gem_uptr gem) -> void
                 // colors match, now test if the gem is adjacent to any
                 // of the gems in this connector
                 if ( gems_are_adjacent( gem.get(), connector_gem.get() ) ) {
-                    matched_connectors.push_back( index );
+                    adjacent_connector_indexes.push_back( index );
                     break;
                 }
-        
+
         // move to next connector
         index++;
     }
@@ -143,8 +143,8 @@ auto Blob::add_gem_to_blob(gem_uptr gem) -> void
 
         // merge connected connectors
         std::for_each( std::next(adjacent_connector_indexes.begin()), adjacent_connector_indexes.end(),
-            [&]( const int& connector_to_splice ){
-                // list splice is constant time and won't 
+            [&]( const int& connector_to_splice_index ){
+                // list splice is constant time and won't
                 // move elements in memory
                 blob[ destination_connector_index ].splice(
                 blob[ destination_connector_index ].begin(),
@@ -161,18 +161,3 @@ auto Blob::add_gem_to_blob(gem_uptr gem) -> void
         blob.push_back( std::move(temp) );
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
