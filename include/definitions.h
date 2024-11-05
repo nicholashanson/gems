@@ -1,6 +1,5 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
-//#define TEST
 #include <array>
 #include "settings.h"
 #include <memory>
