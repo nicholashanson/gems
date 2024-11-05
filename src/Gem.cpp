@@ -40,5 +40,3 @@ auto Gem::jump_x(span_t distance) -> void
 // friend
 auto swap_colors(gem_raw_ptr lhs, gem_raw_ptr rhs) -> void
 {
-    std::swap(lhs->gem_color, rhs->gem_color);
-}
