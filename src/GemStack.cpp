@@ -211,7 +211,7 @@ auto GemStack::sweep_left(const span_t distance) -> void
         gem->jump_x(-distance);
 }
 
-auto GemStack::populate_gemstack(gemstack_colors_t gem_colors) -> void
+auto GemStack::populate_gemstack(const gemstack_colors_t gem_colors) -> void
 {
     first(gems) = std::make_unique<Gem>(
         first(gem_colors),
