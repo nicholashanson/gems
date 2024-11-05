@@ -37,7 +37,7 @@ class GemStack
         auto rotate_gemstack() -> void;
         auto advance_gemstack() -> void;
         auto toggle_orientation() -> void;
-        auto populate_gemstack(gemstack_colors_t) -> void;
+        auto populate_gemstack(const gemstack_colors_t) -> void;
 
         auto shift_right() -> void;
         auto shift_left() -> void;
