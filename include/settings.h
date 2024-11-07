@@ -1,6 +1,6 @@
 namespace settings {
-    const int board_width = 9;
-    const int board_height = 14;
+    const int board_width = 5;
+    const int board_height = 12;
     constexpr int board_size = (board_height+1)*(board_width+1);
 
     // gemstack
@@ -18,14 +18,14 @@ namespace settings {
     const int gems_to_connect = 3;
 
     // gems
-    const int square_size = 30;
+    const int square_size = 40;
     constexpr int gem_radius = square_size / 2;
 
     // board
     constexpr int board_height_in_pixels = square_size*(board_height+1);
     constexpr int board_width_in_pixels = square_size*(board_width+1);
-    constexpr int board_x_offset = square_size;
-    constexpr int board_y_offset = square_size;
+    constexpr int board_x_offset = square_size*7;
+    constexpr int board_y_offset = square_size / 2;
 
     // text
     constexpr int text_x_offset = square_size / 2;
@@ -39,8 +39,8 @@ namespace settings {
     constexpr int points_count_width = 5 * square_size;
 
     // window
-    constexpr int window_width = board_x_offset + (board_width+1)*square_size + square_size*10;
-    constexpr int window_height = board_y_offset + (board_height+1)*square_size + square_size;
+    constexpr int window_width = settings::square_size*20;
+    constexpr int window_height = settings::square_size*14;
 
     // next gems
     constexpr int next_gems_x_offset = board_x_offset + board_width_in_pixels + square_size / 2;

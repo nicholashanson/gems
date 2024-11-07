@@ -75,6 +75,8 @@ auto draw_next_gems(const gemstack_colors_t next_colors) -> void
 
 void draw_gem(const gem_raw_ptr gem)
 {
+    if ( gem->get_y() < 0 )
+        return;
     Rectangle rec = {
                 get_gem_x_coord(gem->get_x()),
                 get_gem_y_coord(gem->get_y()),
@@ -216,6 +218,46 @@ auto pause() -> void
     else game.set_status(PAUSED);
 }
 
+auto draw_background()
+{
+    for ( int i = 0; i < 7; i++ )
+        for ( int j = 0; j < 10; j++ )
+            if ( i % 2 == 0 )
+                if ( j % 2 == 1 )
+                    DrawRectangle(
+                        j*settings::square_size*2,
+                        i*settings::square_size*2,
+                        settings::square_size*2,
+                        settings::square_size*2,
+                        BLUE
+                    );
+                else
+                     DrawRectangle(
+                        j*settings::square_size*2,
+                        i*settings::square_size*2,
+                        settings::square_size*2,
+                        settings::square_size*2,
+                        GREEN
+                    );
+            else
+                if ( j % 2 == 1 )
+                    DrawRectangle(
+                        j*settings::square_size*2,
+                        i*settings::square_size*2,
+                        settings::square_size*2,
+                        settings::square_size*2,
+                        GREEN
+                    );
+                else
+                     DrawRectangle(
+                        j*settings::square_size*2,
+                        i*settings::square_size*2,
+                        settings::square_size*2,
+                        settings::square_size*2,
+                        BLUE
+                    );
+}
+
 std::map<int, std::function<void()>> controls
 {
     { KEY_A, [](){ game.set_gemstack_orientation( LEFT ); } },
@@ -239,8 +281,8 @@ int main()
         game.advance_game();
 
         BeginDrawing();
-        ClearBackground(GRAY);
 
+        draw_background();
         draw_board();
         draw_points_count(game.get_current_score());
         draw_blob(game.get_blob());
