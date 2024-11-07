@@ -7,6 +7,72 @@ auto get_gem_y_coord(int) -> int;
 int flash_gems_count = 0;
 blob_t destroyed_gems;
 
+auto draw_next_gems(const gemstack_colors_t next_colors) -> void
+{
+    DrawRectangle(
+        settings::next_gems_x_offset,
+        settings::next_gems_y_offset,
+        settings::square_size,
+        settings::square_size*settings::gems_in_gemstack,
+        BLACK
+    );
+    for ( int i = 0; i < settings::gems_in_gemstack; i++ ) {
+        Rectangle rec = {
+                settings::next_gems_x_offset,
+                settings::next_gems_y_offset + i*settings::square_size,
+                settings::square_size,
+                settings::square_size
+            };
+        switch ( next_colors[ i ] ){
+            case YELLOW_C:
+                DrawPoly(
+                          Vector2{
+                              settings::next_gems_x_offset + settings::square_size / 2,
+                              settings::next_gems_y_offset + i*settings::square_size + settings::square_size / 2},
+                          6,
+                          settings::square_size / 2,
+                          90,
+                          YELLOW);
+                break;
+            case BLUE_C:
+                DrawRectangleRounded(
+                          rec,
+                          0.2f,
+                          0,
+                          BLUE);
+                break;
+            case GREEN_C:
+                DrawPoly(
+                          Vector2{
+                              settings::next_gems_x_offset + settings::square_size / 2,
+                              settings::next_gems_y_offset + i*settings::square_size + settings::square_size / 2},
+                          8,
+                          settings::square_size / 2,
+                          360/16,
+                          GREEN);
+                break;
+            case ORANGE_C:
+                DrawPoly(
+                          Vector2{
+                              settings::next_gems_x_offset + settings::square_size / 2,
+                              settings::next_gems_y_offset + i*settings::square_size + settings::square_size / 2},
+                          6,
+                          settings::square_size / 2,
+                          0,
+                          ORANGE);
+                break;
+            case RED_C:
+                DrawCircle(
+                          settings::next_gems_x_offset + settings::square_size / 2,
+                          settings::next_gems_y_offset + i*settings::square_size + settings::square_size / 2,
+                          settings::gem_radius,
+                          RED );
+                break;
+            default: break;
+        }
+    }
+}
+
 void draw_gem(const gem_raw_ptr gem)
 {
     Rectangle rec = {
@@ -179,6 +245,7 @@ int main()
         draw_points_count(game.get_current_score());
         draw_blob(game.get_blob());
         draw_gemstack(game.get_current_gemstack());
+        draw_next_gems(game.get_next_gemstack_colors());
 
         EndDrawing();
 

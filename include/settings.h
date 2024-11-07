@@ -41,4 +41,10 @@ namespace settings {
     // window
     constexpr int window_width = board_x_offset + (board_width+1)*square_size + square_size*10;
     constexpr int window_height = board_y_offset + (board_height+1)*square_size + square_size;
+
+    // next gems
+    constexpr int next_gems_x_offset = board_x_offset + board_width_in_pixels + square_size / 2;
+    constexpr int next_gems_y_offset = board_y_offset;
+    constexpr int next_gems_width = square_size;
+    constexpr int next_gems_height = square_size*3;
 }
