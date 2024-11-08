@@ -1,3 +1,6 @@
+#ifndef SETTINGS_H
+#define SETTINGS_H
+
 namespace settings {
     const int board_width = 5;
     const int board_height = 12;
@@ -48,3 +51,5 @@ namespace settings {
     constexpr int next_gems_width = square_size;
     constexpr int next_gems_height = square_size*3;
 }
+
+#endif // SETTINGS_H
