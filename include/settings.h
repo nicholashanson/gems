@@ -39,7 +39,7 @@ namespace settings {
         board_width_in_pixels + square_size;
     constexpr int points_count_y_offset = board_y_offset +
         board_height_in_pixels / 2;
-    constexpr int points_count_width = 5 * square_size;
+    constexpr int points_count_width = 4 * square_size;
 
     // window
     constexpr int window_width = settings::square_size*20;

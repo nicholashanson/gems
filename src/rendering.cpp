@@ -8,17 +8,27 @@ auto load_textures() -> void
     Image citrine_image = LoadImage( "citrine.png" );
     Image topaz_image = LoadImage( "topaz.png" );
     Image emerald_image = LoadImage( "emerald.png" );
+    Image green_tile_image = LoadImage( "green_tile.png" );
+    Image blue_tile_image = LoadImage( "blue_tile.png" );
+    Image board_square_image = LoadImage( "board_square.png" );
     ruby_texture = LoadTextureFromImage( ruby_image );
     sapphire_texture = LoadTextureFromImage( sapphire_image );
     citrine_texture = LoadTextureFromImage( citrine_image );
     topaz_texture = LoadTextureFromImage( topaz_image );
     emerald_texture = LoadTextureFromImage( emerald_image );
+    green_tile_texture = LoadTextureFromImage( green_tile_image );
+    blue_tile_texture = LoadTextureFromImage( blue_tile_image );
+    board_square_texture = LoadTextureFromImage( board_square_image );
     UnloadImage( ruby_image );
     UnloadImage( sapphire_image );
     UnloadImage( citrine_image );
     UnloadImage( topaz_image );
     UnloadImage( emerald_image );
+    UnloadImage( green_tile_image );
+    UnloadImage( blue_tile_image );
+    UnloadImage( board_square_image );
 }
+
 
 auto get_next_gems_y_offset(const int i) -> unsigned {
     return settings::next_gems_y_offset + i * settings::square_size;
@@ -136,11 +146,12 @@ auto draw_gemstack(GemStack* gemstack) -> void
 
 auto draw_board() -> void
 {
-    DrawRectangle( settings::board_x_offset,
-                   settings::board_y_offset,
-                   settings::board_width_in_pixels,
-                   settings::board_height_in_pixels,
-                   BLACK );
+    for ( int i = 0; i <= settings::board_width; i++ )
+        for ( int j = 0; j <= settings::board_height; j++ )
+            DrawTexture( board_square_texture,
+                         settings::board_x_offset + i * settings::square_size,
+                         settings::board_y_offset + j * settings::square_size,
+                         WHITE );
 }
 
 auto flash_gems() -> void
@@ -163,42 +174,21 @@ auto flash_gems() -> void
 
 auto draw_background() -> void
 {
-    for ( int i = 0; i < 7; i++ )
-        for ( int j = 0; j < 10; j++ )
+    for ( int i = 0; i < 14; i++ )
+        for ( int j = 0; j < 20; j++ ) {
+            const x_t x = j * settings::square_size;
+            const y_t y = i * settings::square_size;
             if ( i % 2 == 0 )
                 if ( j % 2 == 1 )
-                    DrawRectangle(
-                        j*settings::square_size*2,
-                        i*settings::square_size*2,
-                        settings::square_size*2,
-                        settings::square_size*2,
-                        YELLOW
-                    );
+                    DrawTexture( green_tile_texture, x, y, WHITE );
                 else
-                     DrawRectangle(
-                        j*settings::square_size*2,
-                        i*settings::square_size*2,
-                        settings::square_size*2,
-                        settings::square_size*2,
-                        PURPLE
-                    );
+                    DrawTexture( blue_tile_texture, x, y, WHITE );
             else
                 if ( j % 2 == 1 )
-                    DrawRectangle(
-                        j*settings::square_size*2,
-                        i*settings::square_size*2,
-                        settings::square_size*2,
-                        settings::square_size*2,
-                        PURPLE
-                    );
+                    DrawTexture( blue_tile_texture, x, y, WHITE );
                 else
-                     DrawRectangle(
-                        j*settings::square_size*2,
-                        i*settings::square_size*2,
-                        settings::square_size*2,
-                        settings::square_size*2,
-                        YELLOW
-                    );
+                    DrawTexture( green_tile_texture, x, y, WHITE );
+        }
 }
 
 

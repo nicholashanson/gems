@@ -31,6 +31,8 @@ int main()
 
     load_textures();
 
+
+
     SetTargetFPS(4);
 
     while ( !WindowShouldClose() )
@@ -38,9 +40,9 @@ int main()
         game.advance_game();
 
         BeginDrawing();
-
         draw_background();
         draw_board();
+
         draw_points_count( game.get_current_score() );
         draw_blob( game.get_blob() );
         draw_gemstack( game.get_current_gemstack() );

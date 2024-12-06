@@ -12,6 +12,9 @@ static Texture2D sapphire_texture;
 static Texture2D citrine_texture;
 static Texture2D topaz_texture;
 static Texture2D emerald_texture;
+static Texture2D green_tile_texture;
+static Texture2D blue_tile_texture;
+static Texture2D board_square_texture;
 
 auto load_textures() -> void;
 
