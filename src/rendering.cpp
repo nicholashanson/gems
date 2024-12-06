@@ -1,64 +1,60 @@
 #include "rendering.h"
+#include "colors.h"
+
+auto load_textures() -> void
+{
+    Image ruby_image = LoadImage( "ruby.png" );
+    Image sapphire_image = LoadImage( "sapphire.png" );
+    Image citrine_image = LoadImage( "citrine.png" );
+    Image topaz_image = LoadImage( "topaz.png" );
+    Image emerald_image = LoadImage( "emerald.png" );
+    ruby_texture = LoadTextureFromImage( ruby_image );
+    sapphire_texture = LoadTextureFromImage( sapphire_image );
+    citrine_texture = LoadTextureFromImage( citrine_image );
+    topaz_texture = LoadTextureFromImage( topaz_image );
+    emerald_texture = LoadTextureFromImage( emerald_image );
+    UnloadImage( ruby_image );
+    UnloadImage( sapphire_image );
+    UnloadImage( citrine_image );
+    UnloadImage( topaz_image );
+    UnloadImage( emerald_image );
+}
+
+auto get_next_gems_y_offset(const int i) -> unsigned {
+    return settings::next_gems_y_offset + i * settings::square_size;
+}
+
+auto get_next_gems_offset(const int i) -> Vector2 {
+    return Vector2{ settings::next_gems_x_offset,
+                     settings::next_gems_y_offset + i * settings::square_size + settings::square_size / 2 };
+}
 
 auto draw_next_gems(const gemstack_colors_t next_colors) -> void
 {
-    DrawRectangle( settings::next_gems_x_offset,
+    DrawRectangle( settings::next_gems_container_x_offset,
                    settings::next_gems_y_offset,
                    settings::square_size,
                    settings::square_size *
                    settings::gems_in_gemstack,
                    BLACK );
+
     for ( int i = 0; i < settings::gems_in_gemstack; i++ ) {
-        Rectangle rec = { settings::next_gems_x_offset,
-                          settings::next_gems_y_offset +
-                          i * settings::square_size,
-                          settings::square_size,
-                          settings::square_size };
+        const y_t y = get_next_gems_y_offset( i );
         switch ( next_colors[ i ] ){
             case YELLOW_C:
-                DrawPoly( Vector2{ settings::next_gems_x_offset +
-                            settings::square_size / 2,
-                            settings::next_gems_y_offset +
-                            i * settings::square_size +
-                            settings::square_size / 2 },
-                          6,
-                          settings::square_size / 2,
-                          90,
-                          YELLOW);
+                DrawTexture( topaz_texture, settings::next_gems_x_offset, y, WHITE );
                 break;
             case BLUE_C:
-                DrawRectangleRounded( rec, 0.2f, 0, BLUE);
+                DrawTexture( sapphire_texture, settings::next_gems_x_offset, y, WHITE );
                 break;
             case GREEN_C:
-                DrawPoly( Vector2{ settings::next_gems_x_offset +
-                            settings::square_size / 2,
-                            settings::next_gems_y_offset +
-                            i * settings::square_size +
-                            settings::square_size / 2 },
-                          8,
-                          settings::square_size / 2,
-                          360/16,
-                          GREEN);
+                DrawTexture( emerald_texture, settings::next_gems_x_offset, y, WHITE );
                 break;
             case ORANGE_C:
-                DrawPoly( Vector2{ settings::next_gems_x_offset +
-                            settings::square_size / 2,
-                            settings::next_gems_y_offset +
-                            i * settings::square_size +
-                            settings::square_size / 2},
-                          6,
-                          settings::square_size / 2,
-                          0,
-                          ORANGE);
+                DrawTexture( citrine_texture, settings::next_gems_x_offset, y, WHITE );
                 break;
             case RED_C:
-                DrawCircle( settings::next_gems_x_offset +
-                            settings::square_size / 2,
-                            settings::next_gems_y_offset +
-                            i * settings::square_size +
-                            settings::square_size / 2,
-                            settings::gem_radius,
-                            RED );
+                DrawTexture( ruby_texture, settings::next_gems_x_offset, y, WHITE );
                 break;
             default: break;
         }
@@ -69,54 +65,23 @@ auto draw_gem(const gem_raw_ptr gem) -> void
 {
     if ( gem->get_y() < 0 )
         return;
-    Rectangle rec = {
-        get_gem_x_coord(gem->get_x()),
-        get_gem_y_coord(gem->get_y()),
-        settings::square_size,
-        settings::square_size
-    };
+    const x_t x = get_gem_x_coord(gem->get_x());
+    const y_t y = get_gem_y_coord(gem->get_y());
     switch (gem->get_color()){
         case YELLOW_C:
-            DrawPoly( Vector2{
-                        get_gem_x_coord(gem->get_x()) +
-                        settings::square_size / 2,
-                        get_gem_y_coord(gem->get_y()) +
-                        settings::square_size / 2 },
-                      6,
-                      settings::square_size / 2,
-                      90,
-                      YELLOW);
+            DrawTexture( topaz_texture, x, y, WHITE );
             break;
         case BLUE_C:
-            DrawRectangleRounded( rec, 0.2f, 0, BLUE);
+            DrawTexture( sapphire_texture, x, y, WHITE );
             break;
         case GREEN_C:
-            DrawPoly( Vector2{ get_gem_x_coord(gem->get_x()) +
-                        settings::square_size / 2,
-                        get_gem_y_coord(gem->get_y()) +
-                        settings::square_size / 2},
-                      8,
-                      settings::square_size / 2,
-                      360/16,
-                      GREEN);
+            DrawTexture( emerald_texture, x, y, WHITE );
             break;
         case ORANGE_C:
-            DrawPoly( Vector2{ get_gem_x_coord(gem->get_x()) +
-                        settings::square_size / 2,
-                        get_gem_y_coord(gem->get_y()) +
-                        settings::square_size / 2},
-                      6,
-                      settings::square_size / 2,
-                      0,
-                      ORANGE);
+            DrawTexture( citrine_texture, x, y, WHITE );
             break;
         case RED_C:
-            DrawCircle( get_gem_x_coord(gem->get_x()) +
-                        settings::square_size / 2,
-                        get_gem_y_coord(gem->get_y()) +
-                        settings::square_size / 2,
-                        settings::gem_radius,
-                        RED );
+            DrawTexture( ruby_texture, x, y, WHITE );
             break;
         default: break;
     }
@@ -207,7 +172,7 @@ auto draw_background() -> void
                         i*settings::square_size*2,
                         settings::square_size*2,
                         settings::square_size*2,
-                        BLUE
+                        YELLOW
                     );
                 else
                      DrawRectangle(
@@ -215,7 +180,7 @@ auto draw_background() -> void
                         i*settings::square_size*2,
                         settings::square_size*2,
                         settings::square_size*2,
-                        GREEN
+                        PURPLE
                     );
             else
                 if ( j % 2 == 1 )
@@ -224,7 +189,7 @@ auto draw_background() -> void
                         i*settings::square_size*2,
                         settings::square_size*2,
                         settings::square_size*2,
-                        GREEN
+                        PURPLE
                     );
                 else
                      DrawRectangle(
@@ -232,7 +197,7 @@ auto draw_background() -> void
                         i*settings::square_size*2,
                         settings::square_size*2,
                         settings::square_size*2,
-                        BLUE
+                        YELLOW
                     );
 }
 

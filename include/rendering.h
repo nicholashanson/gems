@@ -7,6 +7,14 @@
 static blob_t destroyed_gems;
 static int flash_gems_count = 0;
 
+static Texture2D ruby_texture;
+static Texture2D sapphire_texture;
+static Texture2D citrine_texture;
+static Texture2D topaz_texture;
+static Texture2D emerald_texture;
+
+auto load_textures() -> void;
+
 auto flash_gems() -> void;
 
 // drawing
