@@ -25,6 +25,7 @@ std::map<int, std::function<void()>> controls
 
 int main()
 {
+
     InitWindow(settings::window_width,
                settings::window_height,
                "Gems");

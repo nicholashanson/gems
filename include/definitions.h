@@ -14,6 +14,7 @@
 #include <cassert>
 #include <map>
 #include <functional>
+#include <iostream>
 
 class Gem;
 class GemStack;

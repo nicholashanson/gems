@@ -7,14 +7,20 @@
 static blob_t destroyed_gems;
 static int flash_gems_count = 0;
 
-static Texture2D ruby_texture;
-static Texture2D sapphire_texture;
-static Texture2D citrine_texture;
-static Texture2D topaz_texture;
-static Texture2D emerald_texture;
-static Texture2D green_tile_texture;
-static Texture2D blue_tile_texture;
-static Texture2D board_square_texture;
+static std::string path = "images/";
+static std::string extension = ".png";
+static std::map<std::string, Texture2D> textures;
+static std::array<std::string, 8> images =
+{
+    "ruby",
+    "sapphire",
+    "topaz",
+    "citrine",
+    "emerald",
+    "green_tile",
+    "blue_tile",
+    "board_square"
+};
 
 auto load_textures() -> void;
 
